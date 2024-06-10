@@ -7,7 +7,7 @@ import { fetchAllUser } from "../service/UserService";
 import ModalEdit from "./ModalEdit";
 import ModalConfirm from "./ModalConfirm";
 import "./TableUser.scss";
-import _ from "lodash";
+import _, { debounce } from "lodash";
 
 const TableUsers = (props) => {
   const [listUsers, setListUsers] = useState([]);
@@ -21,6 +21,8 @@ const TableUsers = (props) => {
 
   const [sortBy, setSortBy] = useState("asc");
   const [sortField, setSortField] = useState("id");
+
+  const [keyword, setKeyword] = useState("");
 
   const handleSort = (sortBy, sortField) => {
     setSortBy(sortBy);
@@ -78,6 +80,19 @@ const TableUsers = (props) => {
     cloneListUser = cloneListUser.filter((item) => item.id !== user.id);
     setListUsers(cloneListUser);
   };
+
+  const handleSearch = debounce((event) => {
+    let term = event.target.value;
+    // console.log(term);
+    if (term) {
+      let cloneListUser = _.cloneDeep(listUsers);
+      cloneListUser = cloneListUser.filter(item => item.email.includes(term));
+      // cloneListUser = _.includes(cloneListUser, item => item);
+      setListUsers(cloneListUser);
+    } else {
+      getAllUser(1);
+    }
+  },300);
   return (
     <>
       <div className="my-3 add-new">
@@ -91,6 +106,15 @@ const TableUsers = (props) => {
           Add new user
         </button>
       </div>
+      <div className="col-3 my-3">
+        <input
+          className="form-control"
+          placeholder="Search user by email"
+          // value={keyword}
+          onChange={(event) => handleSearch(event)}
+        />
+      </div>
+    
       <Table striped bordered hover>
         <thead>
           <tr>
